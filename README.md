@@ -1,5 +1,11 @@
 # shell commands
 
+### Finds the 10 largest files on your current filesystem
+
+```
+find / -xdev -type f -exec du -Sh {} + | sort -rh | head -n 10
+```
+
 ### Memory usage statistics for each running Docker container on the system
 ```
 for c in `docker container ls --format "{{.Names}}"`; do echo -n "$c => " ; for i in `docker top $c | awk '{print $2}' | grep -v PID`; do pmap $i | tail -1 | awk '{print $2}' | rev | cut -c2- | rev | xargs bash -c 'echo $(($0 * 1024))'; done | paste -sd+ - | bc | numfmt --to=iec; done
