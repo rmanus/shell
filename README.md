@@ -1,5 +1,11 @@
 # shell commands
 
+### Get GDB backtrace for all threads
+
+```
+thread apply all bt
+```
+
 ### Finds the 10 largest files on your current filesystem
 
 ```
