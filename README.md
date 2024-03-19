@@ -11,7 +11,55 @@ thread apply all bt
 ```
 find / -xdev -type f -exec du -Sh {} + | sort -rh | head -n 10
 ```
+### awscli empty bucket
+```
+export AWS_ENDPOINT_URL=https://...
+export AWS_PROFILE=...
+export BUCKET=...
+aws s3api delete-objects --bucket $BUCKET --delete "$(aws s3api list-object-versions --bucket $BUCKET --output=json --query='{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}')"
+aws s3api delete-objects --bucket $BUCKET --delete "$(aws s3api list-object-versions --bucket $BUCKET --output=json --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"
+```
+or using lifecycle
+```
+cat << JSON > lifecycle-expire.json
+{
+    "Rules": [
+        {
+            "ID": "remove-all-objects-asap",
+            "Filter": {
+                "Prefix": ""
+            },
+            "Status": "Enabled",
+            "Expiration": {
+                "Days": 1
+            },
+            "NoncurrentVersionExpiration": {
+                "NoncurrentDays": 1
+            },
+            "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 1
+            }
+        },
+        {
+            "ID": "remove-expired-delete-markers",
+            "Filter": {
+                "Prefix": ""
+            },
+            "Status": "Enabled",
+            "Expiration": {
+                "ExpiredObjectDeleteMarker": true
+            }
+        }
+    ]
+}
+JSON
 
+# Apply to ALL buckets
+aws s3 ls | cut -d" " -f 3 | xargs -I{} aws s3api put-bucket-lifecycle-configuration --bucket {} --lifecycle-configuration file://lifecycle-expire.json
+
+# Apply to a single bucket; replace $BUCKET_NAME
+aws s3api put-bucket-lifecycle-configuration --bucket $BUCKET_NAME --lifecycle-configuration file://lifecycle-expire.json
+```
 ### Memory usage statistics for each running Docker container on the system
 ```
 for c in `docker container ls --format "{{.Names}}"`; do echo -n "$c => " ; for i in `docker top $c | awk '{print $2}' | grep -v PID`; do pmap $i | tail -1 | awk '{print $2}' | rev | cut -c2- | rev | xargs bash -c 'echo $(($0 * 1024))'; done | paste -sd+ - | bc | numfmt --to=iec; done
