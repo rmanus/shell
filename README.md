@@ -1,17 +1,24 @@
 # shell commands
 
-### Get GDB backtrace for all threads
+# Table of Contents
+1. [Get GDB backtrace for all threads](#one)
+2. [Finds the 10 largest files on your current filesystem](#two)
+3. [awscli empty bucket](#three)
+4. [Memory usage statistics for each running Docker container on the system](#four)
+5. [Save git credentials on Linux](#five)
+
+### Get GDB backtrace for all threads<a name="one"></a>.
 
 ```
 thread apply all bt
 ```
 
-### Finds the 10 largest files on your current filesystem
+### Finds the 10 largest files on your current filesystem<a name="two"></a>.
 
 ```
 find / -xdev -type f -exec du -Sh {} + | sort -rh | head -n 10
 ```
-### awscli empty bucket
+### awscli empty bucket<a name="three"></a>.
 ```
 export AWS_ENDPOINT_URL=https://...
 export AWS_PROFILE=...
@@ -60,7 +67,7 @@ aws s3 ls | cut -d" " -f 3 | xargs -I{} aws s3api put-bucket-lifecycle-configura
 # Apply to a single bucket; replace $BUCKET_NAME
 aws s3api put-bucket-lifecycle-configuration --bucket $BUCKET_NAME --lifecycle-configuration file://lifecycle-expire.json
 ```
-### Memory usage statistics for each running Docker container on the system
+### Memory usage statistics for each running Docker container on the system<a name="four"></a>.
 ```
 for c in `docker container ls --format "{{.Names}}"`; do echo -n "$c => " ; for i in `docker top $c | awk '{print $2}' | grep -v PID`; do pmap $i | tail -1 | awk '{print $2}' | rev | cut -c2- | rev | xargs bash -c 'echo $(($0 * 1024))'; done | paste -sd+ - | bc | numfmt --to=iec; done
 ```
@@ -84,3 +91,13 @@ This shell command is a complex one-liner that retrieves memory usage statistics
 Putting it all together, the command displays the memory usage of each running Docker container on the system in a human-readable format, showing the container name followed by its memory usage in bytes (formatted using IEC standards).
 
 Note: Be cautious while running complex shell commands like this as they can have unintended consequences, especially when it comes to Docker containers and resource-intensive operations. Always ensure you understand what a command does before executing it on your system.
+
+
+### Save git credentials on Linux<a name="five"></a>
+
+`git config --global credential.helper store`
+
+```
+Note that this will store your username and password in a plain text file at ~/.git-credentials.
+```
+
