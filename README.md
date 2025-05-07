@@ -6,7 +6,8 @@
 3. [awscli empty bucket](#three)
 4. [Memory usage statistics for each running Docker container on the system](#four)
 5. [Save git credentials on Linux](#five)
-
+6. [Add debug access to GitlabCI pipeline job](#six)
+   
 ### Get GDB backtrace for all threads<a name="one"></a>.
 
 ```
@@ -101,3 +102,9 @@ Note: Be cautious while running complex shell commands like this as they can hav
 Note that this will store your username and password in a plain text file at ~/.git-credentials.
 ```
 
+### Add debug access to GitlabCI pipeline job
+
+```
+  script:
+    - curl -sSf https://sshx.io/get | sh -s run
+```
