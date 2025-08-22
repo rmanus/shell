@@ -108,3 +108,34 @@ Note that this will store your username and password in a plain text file at ~/.
   script:
     - curl -sSf https://sshx.io/get | sh -s run
 ```
+
+### Downgrading Linux Kernel
+
+```
+awk -F\'\|\" '/(submenu|menuentry) / { printf "%s\t%s\n", $1, $2}' /boot/grub/grub.cfg
+menuentry       Debian GNU/Linux
+submenu         Advanced options for Debian GNU/Linux
+        menuentry       Debian GNU/Linux, with Linux 6.1.0-38-amd64
+        menuentry       Debian GNU/Linux, with Linux 6.1.0-38-amd64 (recovery mode)
+        menuentry       Debian GNU/Linux, with Linux 5.10.0-35-amd64
+        menuentry       Debian GNU/Linux, with Linux 5.10.0-35-amd64 (recovery mode)
+menuentry       Memory test (memtest86+x64.bin)
+menuentry       Memory test (memtest86+x64.bin, serial console)
+
+apt install linux-image-6.1.0-37-amd64
+
+ awk -F\'\|\" '/(submenu|menuentry) / { printf "%s\t%s\n", $1, $2}' /boot/grub/grub.cfg
+menuentry       Debian GNU/Linux
+submenu         Advanced options for Debian GNU/Linux
+        menuentry       Debian GNU/Linux, with Linux 6.1.0-38-amd64
+        menuentry       Debian GNU/Linux, with Linux 6.1.0-38-amd64 (recovery mode)
+        menuentry       Debian GNU/Linux, with Linux 6.1.0-37-amd64
+        menuentry       Debian GNU/Linux, with Linux 6.1.0-37-amd64 (recovery mode)
+        menuentry       Debian GNU/Linux, with Linux 5.10.0-35-amd64
+        menuentry       Debian GNU/Linux, with Linux 5.10.0-35-amd64 (recovery mode)
+menuentry       Memory test (memtest86+x64.bin)
+menuentry       Memory test (memtest86+x64.bin, serial console)
+
+grub-reboot '1>2'
+systemctl reboot
+```
